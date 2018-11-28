@@ -216,6 +216,11 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
     }
 
     if (ngx_use_accept_mutex) {
+        /* Nginx 使用 ngx_accept_disabled这个变量来控制进程是否去竞争 accept_mutex
+           ngx_accept_disable 初始为ngx_cycle->connection_n / 8 -
+           ngx_cycle->free_connection_n。当空闲链接少于总链接的 1/8时，为负值；不去竞争
+           accept_mutex。
+        */
         if (ngx_accept_disabled > 0) {
             ngx_accept_disabled--;
 

@@ -786,11 +786,13 @@ ngx_get_options(int argc, char *const *argv)
                 break;
 
             case 'p':
+                /* 如果 -p 后面紧跟 prefix, 即: -pprefix */
                 if (*p) {
                     ngx_prefix = p;
                     goto next;
                 }
-
+                
+                /* 如果 -p 后面没有紧跟 prefix */
                 if (argv[++i]) {
                     ngx_prefix = (u_char *) argv[i];
                     goto next;
