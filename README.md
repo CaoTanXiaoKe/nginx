@@ -8,6 +8,6 @@
 - Nginx 官网文档: http://nginx.org
 - 我的机器：腾讯云CVM： Linux VM_16_22_centos 3.10.0-862.el7.x86_64
 - 参考资料
-     - (Nginx开发从入门到精通)[http://tengine.taobao.org/book/]
+     - [Nginx开发从入门到精通](http://tengine.taobao.org/book/)
      - 《深入理解Nginx (第二版)》陶辉
 
