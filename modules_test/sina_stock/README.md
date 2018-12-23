@@ -27,4 +27,4 @@ openssl openssl-devel
 ```
 
 #### Test case
-- `curl 'http://localhost/query?sh000001'`
+- `curl 'http://localhost/sinastock?sh000001'`

@@ -8,33 +8,33 @@
 typedef struct
 {
     ngx_str_t		stock[STOCKNUM];
-} ngx_http_mytest_ctx_t;
+} ngx_http_sinastock_ctx_t;
 
 
 static char *
-ngx_http_mytest(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+ngx_http_sinastock(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 static ngx_int_t 
-ngx_http_mytest_handler(ngx_http_request_t *r);
+ngx_http_sinastock_handler(ngx_http_request_t *r);
 
 /* 子请求执行结束时的回调方法。*/
 static ngx_int_t 
-mytest_subrequest_post_handler(ngx_http_request_t *r, void *data, ngx_int_t rc);
+sinastock_subrequest_post_handler(ngx_http_request_t *r, void *data, ngx_int_t rc);
 
 /* 父请求被激活时的回调方法。*/
 static void
-mytest_post_handler(ngx_http_request_t * r);
+sinastock_post_handler(ngx_http_request_t * r);
 
 
 
 
-static ngx_command_t  ngx_http_mytest_commands[] =
+static ngx_command_t  ngx_http_sinastock_commands[] =
 {
 
     {
-        ngx_string("mytest"),
+        ngx_string("sina_stock"),
         NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_NOARGS,
-        ngx_http_mytest,
+        ngx_http_sinastock,
         NGX_HTTP_LOC_CONF_OFFSET,
         0,
         NULL
@@ -43,7 +43,7 @@ static ngx_command_t  ngx_http_mytest_commands[] =
     ngx_null_command
 };
 
-static ngx_http_module_t  ngx_http_mytest_module_ctx =
+static ngx_http_module_t  ngx_http_sinastock_module_ctx =
 {
     NULL,                           /* preconfiguration */
     NULL,                           /* postconfiguration */
@@ -58,11 +58,11 @@ static ngx_http_module_t  ngx_http_mytest_module_ctx =
     NULL                            /* merge location configuration */
 };
 
-ngx_module_t  ngx_http_mytest_module =
+ngx_module_t  ngx_http_sinastock_module =
 {
     NGX_MODULE_V1,
-    &ngx_http_mytest_module_ctx,           /* module context */
-    ngx_http_mytest_commands,              /* module directives */
+    &ngx_http_sinastock_module_ctx,           /* module context */
+    ngx_http_sinastock_commands,              /* module directives */
     NGX_HTTP_MODULE,                       /* module type */
     NULL,                                  /* init master */
     NULL,                                  /* init module */
@@ -76,12 +76,12 @@ ngx_module_t  ngx_http_mytest_module =
 
 
 static char *
-ngx_http_mytest(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+ngx_http_sinastock(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
 {
     ngx_http_core_loc_conf_t  *clcf;
 
     /*
-      首先找到mytest配置项所属的配置块，clcf貌似是location块内的数据
+      首先找到sinastock配置项所属的配置块，clcf貌似是location块内的数据
       结构，其实不然，它可以是main、srv或者loc级别配置项，也就是说在每个
       http{}和server{}内也都有一个ngx_http_core_loc_conf_t结构体
     */
@@ -89,29 +89,29 @@ ngx_http_mytest(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
 
     /* 
       http框架在处理用户请求进行到NGX_HTTP_CONTENT_PHASE阶段时，如果
-      请求的主机域名、URI与mytest配置项所在的配置块相匹配，就将调用我们
-      实现的ngx_http_mytest_handler方法处理这个请求。
+      请求的主机域名、URI与sinastock配置项所在的配置块相匹配，就将调用我们
+      实现的ngx_http_sinastock_handler方法处理这个请求。
     */
-    clcf->handler = ngx_http_mytest_handler;
+    clcf->handler = ngx_http_sinastock_handler;
 
     return NGX_CONF_OK;
 }
 
 static ngx_int_t
-ngx_http_mytest_handler(ngx_http_request_t * r)
+ngx_http_sinastock_handler(ngx_http_request_t * r)
 {
     /* 创建http上下文 */
-    ngx_http_mytest_ctx_t* myctx = ngx_http_get_module_ctx(r, ngx_http_mytest_module);
+    ngx_http_sinastock_ctx_t* myctx = ngx_http_get_module_ctx(r, ngx_http_sinastock_module);
     if (myctx == NULL)
     {
-        myctx = ngx_palloc(r->pool, sizeof(ngx_http_mytest_ctx_t));
+        myctx = ngx_palloc(r->pool, sizeof(ngx_http_sinastock_ctx_t));
         if (myctx == NULL)
         {
             return NGX_ERROR;
         }
 
         /* 将上下文设置到原始请求r中 */
-        ngx_http_set_ctx(r, myctx, ngx_http_mytest_module);
+        ngx_http_set_ctx(r, myctx, ngx_http_sinastock_module);
     }
 
     /* ngx_http_post_subrequest_t结构体会决定子请求的回调方法。*/
@@ -121,11 +121,11 @@ ngx_http_mytest_handler(ngx_http_request_t * r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    /* 设置子请求回调方法为 mytest_subrequest_post_handler */
-    psr->handler = mytest_subrequest_post_handler;
+    /* 设置子请求回调方法为 sinastock_subrequest_post_handler */
+    psr->handler = sinastock_subrequest_post_handler;
 
     /* 
-      data设为myctx上下文，这样回调mytest_subrequest_post_handler
+      data设为sinastock上下文，这样回调sinastock_subrequest_post_handler
       时传入的data参数就是myctx.
     */
     psr->data = myctx;
@@ -161,7 +161,7 @@ ngx_http_mytest_handler(ngx_http_request_t * r)
 
 
 /* 子请求执行结束时的回调方法。*/
-static ngx_int_t mytest_subrequest_post_handler(ngx_http_request_t *r,
+static ngx_int_t sinastock_subrequest_post_handler(ngx_http_request_t *r,
                                                 void *data, ngx_int_t rc)
 {
     /* 当前请求r是子请求，它的parent成员就指向父请求 */
@@ -171,7 +171,7 @@ static ngx_int_t mytest_subrequest_post_handler(ngx_http_request_t *r,
       其实有更简单的方法，即初始化subrequest时，设置参数 data 为
       请求上下文。 然后就可以通过 myctx = data 取得上下文信息。 
     */
-    ngx_http_mytest_ctx_t* myctx = ngx_http_get_module_ctx(pr, ngx_http_mytest_module);
+    ngx_http_sinastock_ctx_t* myctx = ngx_http_get_module_ctx(pr, ngx_http_sinastock_module);
 
     pr->headers_out.status = r->headers_out.status;
     /*
@@ -213,14 +213,14 @@ static ngx_int_t mytest_subrequest_post_handler(ngx_http_request_t *r,
 
 
     /* 这一步很重要，设置接下来父请求的回调方法 */
-    pr->write_event_handler = mytest_post_handler;
+    pr->write_event_handler = sinastock_post_handler;
 
     return NGX_OK;
 }
 
 
 static void
-mytest_post_handler(ngx_http_request_t * r)
+sinastock_post_handler(ngx_http_request_t * r)
 {
     /* 如果没有返回200则直接把错误码发回用户 */
     if (r->headers_out.status != NGX_HTTP_OK)
@@ -230,7 +230,7 @@ mytest_post_handler(ngx_http_request_t * r)
     }
 
     /* 当前请求是父请求，直接取其上下文 */
-    ngx_http_mytest_ctx_t* myctx = ngx_http_get_module_ctx(r, ngx_http_mytest_module);
+    ngx_http_sinastock_ctx_t* myctx = ngx_http_get_module_ctx(r, ngx_http_sinastock_module);
 
     /*
       定义发给用户的http包体内容，格式为：
